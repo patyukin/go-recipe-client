@@ -4,17 +4,14 @@ import (
 	"fmt"
 	"github.com/joho/godotenv"
 	"github.com/rs/zerolog/log"
-	"github.com/valyala/fasthttp"
 	"os"
 	"strconv"
 )
 
 type Config struct {
-	Port           int
-	RemotePort     int
-	RemoteHost     string
-	HostClient     *fasthttp.HostClient
-	PipelineClient *fasthttp.PipelineClient
+	Port       int
+	RemotePort int
+	RemoteHost string
 }
 
 func LoadConfig() (*Config, error) {
