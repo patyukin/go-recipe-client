@@ -5,6 +5,7 @@ import (
 	"app/internal/model"
 	"encoding/json"
 	"fmt"
+	"github.com/rs/zerolog/log"
 	"github.com/valyala/fasthttp"
 )
 
@@ -23,16 +24,24 @@ func New(cfg *config.Config, hostClient *fasthttp.HostClient, pipelineClient *fa
 }
 
 func (s *Server) GetAllRecipes(ctx *fasthttp.RequestCtx) {
+	log.Info().Msgf("Get all recipes")
 	initialRequest := fasthttp.AcquireRequest()
-	initialRequest.SetRequestURI(fmt.Sprintf("http://%s:%d/recipes?limit=1&offset=0", s.cfg.RemoteHost, s.cfg.RemotePort))
+	url := fmt.Sprintf("http://%s/recipes?limit=1&offset=0", s.cfg.RemoteHost, s.cfg.RemotePort)
+	log.Info().Msgf("URL: %s", url)
+
+	initialRequest.SetRequestURI(url)
 	initialRequest.Header.SetMethod(fasthttp.MethodGet)
+
+	log.Info().Msgf("Making initial request")
 
 	initialResponse := fasthttp.AcquireResponse()
 	err := s.HostClient.Do(initialRequest, initialResponse)
 	if err != nil {
+		log.Error().Msgf("Failed to make initial request: %v", err)
 		writeErrorResponse(ctx, fasthttp.StatusInternalServerError, fmt.Sprintf("Failed to make initial request: %v", err))
 		return
 	}
+
 	defer fasthttp.ReleaseRequest(initialRequest)
 	defer fasthttp.ReleaseResponse(initialResponse)
 

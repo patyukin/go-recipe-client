@@ -1,0 +1,17 @@
+services:
+  app:
+    build:
+      dockerfile: local.Dockerfile
+    container_name: go-recipe-client-container
+    restart: always
+    volumes:
+      - .:/app
+    ports:
+      - "1236:1236"
+    networks:
+      - allapps
+
+networks:
+  allapps:
+    name: allapps
+    external: true
