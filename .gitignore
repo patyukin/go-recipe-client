@@ -3,3 +3,4 @@ go_build_*
 /config/.env
 /config/.env.local
 /bin/*
+config.yaml
