@@ -10,6 +10,7 @@ RUN go build -o ./bin/recipe_client cmd/client/main.go
 FROM alpine:3.19
 
 WORKDIR /app
+ENV YAML_CONFIG_FILE_PATH=config.yaml
 COPY --from=builder /app/bin/recipe_client .
 
 CMD ["./recipe_client"]
