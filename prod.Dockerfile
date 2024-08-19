@@ -11,7 +11,5 @@ FROM alpine:3.19
 
 WORKDIR /app
 COPY --from=builder /app/bin/recipe_client .
-COPY config/.env .env
-ENV ENV_CONFIG_FILE_PATH=.env
 
 CMD ["./recipe_client"]
