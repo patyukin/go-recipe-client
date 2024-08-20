@@ -50,21 +50,8 @@ jobs:
             # Login into Selectel Registry
             docker login -u ${{ secrets.REGISTRY_USERNAME }} -p ${{ secrets.REGISTRY_PASSWORD }} $REGISTRY
             
-            # Stop running container
-            docker stop $CONTAINER_NAME
-            
-            # Remove old container
-            docker rm $CONTAINER_NAME
-            
             # cd project directory
             cd ~/go-recipe-client
             
-            # Run a new container from a new image
-            docker run -d \
-              -p 1236:1236 \
-              -v ./config.yaml:/app/config.yaml \
-              --network=pg \
-              --network=redis \
-              --network=allapps \
-              --name $CONTAINER_NAME \
-              -t $REGISTRY/$IMAGE_NAME:$TAG_NAME
+            # deploy
+            ./deploy.sh $TAG_NAME
