@@ -2,40 +2,46 @@ package config
 
 import (
 	"fmt"
-	"github.com/joho/godotenv"
+	"github.com/go-playground/validator/v10"
 	"github.com/rs/zerolog/log"
+	"gopkg.in/yaml.v3"
 	"os"
-	"strconv"
 )
 
 type Config struct {
-	Port       int
-	RemotePort int
-	RemoteHost string
+	Port       int    `yaml:"port" validate:"required"`
+	RemotePort int    `yaml:"remote_port" validate:"required"`
+	RemoteHost string `yaml:"remote_host" validate:"required"`
 }
 
 func LoadConfig() (*Config, error) {
-	envConfigFilePath := os.Getenv("ENV_CONFIG_FILE_PATH")
-	if err := godotenv.Load(envConfigFilePath); err != nil {
-		log.Fatal().Msgf("Error loading .env file")
+	yamlConfigFilePath := os.Getenv("YAML_CONFIG_FILE_PATH")
+	if yamlConfigFilePath == "" {
+		return nil, fmt.Errorf("yaml config file path is not set")
 	}
+
+	f, err := os.Open(yamlConfigFilePath)
+	if err != nil {
+		return nil, fmt.Errorf("unable to open config file: %w", err)
+	}
+
+	defer func(f *os.File) {
+		if err = f.Close(); err != nil {
+			log.Printf("unable to close config file: %v", err)
+		}
+	}(f)
 
 	cfg := &Config{}
 
-	remotePort, err := strconv.Atoi(os.Getenv("REMOTE_PORT"))
-	if err != nil {
-		return nil, fmt.Errorf("failed to parse REMOTE_PORT: %v", err)
+	decoder := yaml.NewDecoder(f)
+	if err = decoder.Decode(&cfg); err != nil {
+		return nil, fmt.Errorf("unable to decode config file: %w", err)
 	}
 
-	cfg.RemotePort = remotePort
-
-	port, err := strconv.Atoi(os.Getenv("HTTP_PORT"))
-	if err != nil {
-		return nil, fmt.Errorf("failed to parse HTTP_PORT: %v", err)
+	validate := validator.New()
+	if err = validate.Struct(&cfg); err != nil {
+		return nil, fmt.Errorf("config validation failed: %w", err)
 	}
-
-	cfg.Port = port
-	cfg.RemoteHost = os.Getenv("REMOTE_HOST")
 
 	return cfg, nil
 }
