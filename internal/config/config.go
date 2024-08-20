@@ -9,7 +9,7 @@ import (
 )
 
 type Config struct {
-	Port       int    `yaml:"port" validate:"required"`
+	Port       int    `yaml:"http_port" validate:"required"`
 	RemotePort int    `yaml:"remote_port" validate:"required"`
 	RemoteHost string `yaml:"remote_host" validate:"required"`
 }
@@ -31,8 +31,7 @@ func LoadConfig() (*Config, error) {
 		}
 	}(f)
 
-	cfg := &Config{}
-
+	var cfg Config
 	decoder := yaml.NewDecoder(f)
 	if err = decoder.Decode(&cfg); err != nil {
 		return nil, fmt.Errorf("unable to decode config file: %w", err)
@@ -43,5 +42,5 @@ func LoadConfig() (*Config, error) {
 		return nil, fmt.Errorf("config validation failed: %w", err)
 	}
 
-	return cfg, nil
+	return &cfg, nil
 }
